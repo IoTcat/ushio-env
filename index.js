@@ -59,7 +59,7 @@ module.exports = async (o_params) => {
     });
 
     /* mysql */
-    var mysql = alias => new Promise((resolve, reject) => {
+    var mysql = alias => {
         let m = require('mysql');
         let s = {};
         let res;
@@ -67,20 +67,20 @@ module.exports = async (o_params) => {
             s = JSON.parse(fs.readFileSync(params.mysql.dbKeysDir + '/' + alias));
         }catch(e){
             tool.log('In mysql part, cannot read dbKeys from '+params.mysql.dbKeysDir+'/'+alias); 
-            reject(e);
         }
         try{
             res = m.createConnection(s); 
         }catch(e){
             tool.log('In mysql part, cannot create connection.'); 
-            reject(e);
         }
-        resolve(res);
-    });
+        return res;
+    };
 
 
     return new Promise((resolve, reject) => {
         o.redis = redis;
         o.mysql = mysql;
+        
+        resolve(o);
     });
 }
