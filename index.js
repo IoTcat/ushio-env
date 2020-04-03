@@ -12,6 +12,9 @@ module.exports = async (o_params) => {
             host: "redis",
             port: 6379
         },
+        mysql: {
+            dbKeysDir: '/mnt/config/dbKeys'
+        },
         debug: {
             format: (time, content) => {
                 return `Ushio-env: ${tool.time.format(time)} :: ${content}`;
@@ -26,6 +29,9 @@ module.exports = async (o_params) => {
     /* output obj */
     var o = {};
 
+    /* package import */
+    const fs = require('fs');
+
     /* tool func */
     var tool = {
         time: {
@@ -38,7 +44,9 @@ module.exports = async (o_params) => {
                 let s=date.getSeconds();
                 return year+'-'+mon+'-'+da+' '+h+':'+m+':'+s;
             }
-        }
+        },
+        log: s => params.debug.output(params.debug.format(new Date(), s)),
+
     }
 
 
@@ -47,14 +55,32 @@ module.exports = async (o_params) => {
     /* redis */
     var redis = require('redis').createClient(params.redis.port, params.redis.host);
     redis.on('error', err => {
-        params.debug.output(params.debug.format(new Date(), err));
+        tool.log(err);
+    });
+
+    /* mysql */
+    var mysql = alias => new Promise((resolve, reject) => {
+        let m = require('mysql');
+        let s = {};
+        let res;
+        try{
+            s = JSON.parse(fs.readFileSync(params.mysql.dbKeysDir + '/' + alias));
+        }catch(e){
+            tool.log('In mysql part, cannot read dbKeys from '+params.mysql.dbKeysDir+'/'+alias); 
+            reject(e);
+        }
+        try{
+            res = m.createConnection(s); 
+        }catch(e){
+            tool.log('In mysql part, cannot create connection.'); 
+            reject(e);
+        }
+        resolve(res);
     });
 
 
-
-
     return new Promise((resolve, reject) => {
-       o.redis = redis;
-
+        o.redis = redis;
+        o.mysql = mysql;
     });
 }
