@@ -1,0 +1,12 @@
+{
+  "name": "ushio-env",
+  "version": "1.0.0",
+  "description": "Ushio env for node-js",
+  "main": "index.js",
+  "repository": "https://github.com/IoTcat/ushio-env.git",
+  "author": "iotcat <i@iotcat.me>",
+  "license": "MIT",
+  "dependencies": {
+    "redis": "^3.0.2"
+  }
+}
